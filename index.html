@@ -3,24 +3,1217 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MedConsult - Home</title>
+  <title>Dashboard - MedConsult</title>
   <link rel="stylesheet" href="style.css" />
+  <style>
+    :root {
+      --card-bg: #1e293b;
+      --input-bg: #334155;
+      --text-muted: #94a3b8;
+      --primary: #38bdf8;
+      --highlight: #f43f5e;
+      --shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      --light-bg: #f8fafc;
+      --light-card: #ffffff;
+      --light-text: #0f172a;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    body.dark {
+      background: #0f172a;
+      color: #f1f5f9;
+    }
+
+    body.light {
+      background: var(--light-bg);
+      color: var(--light-text);
+    }
+
+    header.header {
+      background: var(--card-bg);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: var(--shadow);
+      position: relative;
+      z-index: 10;
+    }
+
+    body.light header.header {
+      background: var(--light-card);
+      color: var(--light-text);
+    }
+
+    .theme-toggle-btn {
+      background: transparent;
+      border: 1px solid var(--text-muted);
+      color: inherit;
+      padding: 0.4rem 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .dashboard-layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    aside.sidebar {
+      width: 220px;
+      background: var(--input-bg);
+      padding-top: 1rem;
+      box-shadow: var(--shadow);
+      flex-shrink: 0;
+      height: 70rem;
+    }
+
+    body.light aside.sidebar {
+      background: var(--light-card);
+    }
+
+    aside.sidebar ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    aside.sidebar a {
+      color: white;
+      text-decoration: none;
+      padding: 0.8rem 1.5rem;
+      display: block;
+    }
+
+    body.light aside.sidebar a {
+      color: var(--light-text);
+    }
+
+    aside.sidebar a.active,
+    aside.sidebar a:hover {
+      background: var(--primary);
+      border-radius: 4px;
+    }
+
+    .dashboard-content {
+      flex: 1;
+      padding: 2rem;
+    }
+
+    .widgets {
+      display: flex;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .widget {
+      flex: 1;
+      background: var(--card-bg);
+      padding: 1rem;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    body.light .widget {
+      background: var(--light-card);
+      color: var(--light-text);
+    }
+
+    .stat-number {
+      font-size: 28px;
+      font-weight: bold;
+      margin-top: 0.5rem;
+      color: var(--primary);
+    }
+
+    .progress-section {
+      margin-bottom: 2rem;
+    }
+
+    .progress-title {
+      font-weight: bold;
+      margin: 0.5rem 0;
+    }
+
+    .progress-bar {
+      background: #1e293b;
+      border-radius: 10px;
+      height: 10px;
+      margin-bottom: 1rem;
+      overflow: hidden;
+    }
+
+    body.light .progress-bar {
+      background: #e2e8f0;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 10px;
+    }
+
+    .calendar,
+    .appointments-box {
+      background: var(--card-bg);
+      border-radius: 10px;
+      padding: 1rem;
+      box-shadow: var(--shadow);
+    }
+
+    body.light .calendar,
+    body.light .appointments-box {
+      background: var(--light-card);
+      color: var(--light-text);
+    }
+
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0.5rem;
+    }
+
+    .calendar-day,
+    .calendar-date {
+      text-align: center;
+      padding: 0.5rem 0;
+    }
+
+    .calendar-day {
+      font-weight: bold;
+      color: var(--text-muted);
+    }
+
+    body.light .calendar-day {
+      color: var(--light-text);
+    }
+
+    .calendar-date {
+      background: var(--input-bg);
+      border-radius: 6px;
+      cursor: pointer;
+      color: white;
+    }
+
+    body.light .calendar-date {
+      background: #cbd5e1;
+      color: var(--light-text);
+    }
+
+    .calendar-date.today {
+      background: var(--highlight);
+      color: #fff;
+    }
+
+    .appointment-entry {
+      margin-bottom: 0.8rem;
+      border-bottom: 1px solid #334155;
+      padding-bottom: 0.5rem;
+    }
+
+    .appointment-entry:last-child {
+      border-bottom: none;
+    }
+
+    .notification-icon {
+      position: relative;
+      cursor: pointer;
+      font-size: 1.2rem;
+      margin-right: 1.5rem;
+      color: var(--highlight);
+    }
+
+    .notification-badge {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background: red;
+      color: white;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 50%;
+    }
+
+    .notifications-dropdown {
+      position: absolute;
+      right: 2rem;
+      top: 70px;
+      background: var(--card-bg);
+      border-radius: 6px;
+      box-shadow: var(--shadow);
+      width: 260px;
+      max-height: 300px;
+      overflow-y: auto;
+      z-index: 999;
+      display: none;
+      padding: 1rem;
+    }
+
+    body.light .notifications-dropdown {
+      background: var(--light-card);
+    }
+
+    .notifications-dropdown h4 {
+      margin-bottom: 0.5rem;
+      font-size: 16px;
+    }
+
+    .notifications-dropdown .notif-item {
+      background: var(--input-bg);
+      margin-bottom: 0.5rem;
+      padding: 0.5rem;
+      border-radius: 4px;
+      color: white;
+      font-size: 14px;
+    }
+
+    body.light .notifications-dropdown .notif-item {
+      background: #f1f5f9;
+      color: var(--light-text);
+    }
+
+    .calendar-date.has-note::after {
+  content: "";
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  background-color: #38bdf8;
+  border-radius: 50%;
+}
+
+.calendar-date {
+  position: relative;
+}
+
+
+    /* Logout Confirmation Modal */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background: var(--card-bg);
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      text-align: center;
+      width: 90%;
+      max-width: 400px;
+    }
+
+    .modal-content button {
+      margin: 1rem 0.5rem 0 0.5rem;
+      padding: 0.5rem 1.2rem;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .modal-content .confirm {
+      background: var(--highlight);
+      color: white;
+    }
+
+    .modal-content .cancel {
+      background: #64748b;
+      color: white;
+    }
+
+    body.light .modal-content {
+      background: var(--light-card);
+      color: var(--light-text);
+    }
+
+    body.light .modal-content .cancel {
+      background: #cbd5e1;
+      color: #1e293b;
+    }
+
+    /* Toast Notification */
+#toast-container {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  z-index: 9999;
+}
+
+.toast {
+  background: #0f172a;
+  color: #fff;
+  padding: 0.75rem 1.25rem;
+  margin-top: 10px;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  animation: fadein 0.3s ease, fadeout 0.5s ease 3s;
+  font-size: 0.95rem;
+  min-width: 200px;
+}
+
+body.light .toast {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+@keyframes fadein {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeout {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(20px); }
+}
+
+/* Loader Overlay */
+#loader-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #0f172a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  transition: opacity 0.5s ease;
+}
+
+body.light #loader-overlay {
+  background: #f8fafc;
+}
+
+.spinner {
+  border: 4px solid #94a3b8;
+  border-top: 4px solid var(--primary);
+  border-radius: 50%;
+  width: 45px;
+  height: 45px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.calendar-date.has-note {
+  outline: 2px solid var(--highlight);
+  position: relative;
+}
+
+.calendar-date.has-note::after {
+  content: "📝";
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  font-size: 0.75rem;
+}
+.calendar-date.has-note {
+  background-color: #facc15 !important;
+  color: #0f172a !important;
+  font-weight: bold;
+  border: 2px solid #facc15;
+}
+
+.calendar-date.has-note {
+  position: relative;
+}
+
+.calendar-date.has-note::after {
+  content: attr(data-note);
+  position: absolute;
+  bottom: 120%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #1e293b;
+  color: #fff;
+  padding: 5px 10px;
+  font-size: 12px;
+  white-space: nowrap;
+  border-radius: 5px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 10;
+}
+
+body.light .calendar-date.has-note::after {
+  background-color: #cbd5e1;
+  color: #0f172a;
+}
+
+.calendar-date.has-appointment {
+  border: 2px solid #facc15;
+  border-radius: 8px;
+}
+
+
+.calendar-date.has-note:hover::after {
+  opacity: 1;
+}
+
+  .calendar-date.unavailable {
+  background-color: #334155 !important;
+  color: #94a3b8 !important;
+  cursor: not-allowed;
+}
+
+  </style>
 </head>
-<body>
+<body class="dark">
+  <div id="loader">
+  <div class="spin"></div>
+</div>
+
+
   <header class="header">
-    <h1 class="logo">MedConsult</h1>
-    <div class="actions">
-      <button id="toggle-theme" class="theme-btn">🌙</button>
-      <a href="login.html" class="login-btn">Doctor Login</a>
+    <h1>MediMeet</h1>
+    <div style="display: flex; align-items: center;">
+      <div class="notification-icon" onclick="toggleNotifications()">🔔
+        <span class="notification-badge" id="notifCount">3</span>
+      </div>
+      <button id="themeToggleBtn" class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Theme">🌙</button>
+      <a href="#" class="logout-link" onclick="openLogoutModal()" style="color: #f87171; margin-left: 1rem;">Logout</a>
     </div>
   </header>
+  <!-- Notification Dropdown Panel -->
+<div class="notifications-dropdown" id="notificationsPanel">
+  <h4>Notifications</h4>
+  <div class="notif-item">📅 3 new appointment requests</div>
+  <div class="notif-item">💬 Message from Priya Sharma</div>
+  <div class="notif-item">✅ Prescription sent to Rahul Verma</div>
+</div>
 
-  <main class="hero">
-    <h2>Your Trusted Medical Consultancy</h2>
-    <p>Connect with patients, manage appointments, and provide better care — all in one place.</p>
-    <a href="login.html" class="cta-btn">Get Started</a>
-  </main>
 
-  <script src="script.js"></script>
+  <!-- Logout Confirmation Modal -->
+  <div id="logoutModal" class="modal">
+    <div class="modal-content">
+      <p>Are you sure you want to logout?</p>
+      <button class="confirm" onclick="confirmLogout()">Yes, Logout</button>
+      <button class="cancel" onclick="closeLogoutModal()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Your existing dashboard content remains unchanged... -->
+  <div class="dashboard-layout">
+    <aside class="sidebar">
+      <ul>
+        <li><a href="dashboard.html" class="active">Dashboard</a></li>
+        <li><a href="appointments.html">Appointments</a></li>
+        <li><a href="patients.html">Patients</a></li>
+        <li><a href="prescriptions.html">Prescriptions</a></li>
+        <li><a href="settings.html">Settings</a></li>
+        <li><a href="doctor-profile.html">Profile</a></li>
+      </ul>
+    </aside>
+
+    <main class="dashboard-content">
+      <h2>Welcome Back, Doctor</h2>
+      <div class="notes-section">
+  <h2>📝 Doctor's Notes (for Today)</h2>
+  <textarea id="doctorNote" placeholder="Write your notes here..." rows="6"></textarea>
+  <p id="saveStatus" style="font-size: 0.9rem; color: var(--text-muted); margin-top: 5px;"></p>
+</div>
+
+
+      <!-- Stats -->
+      <div class="widgets">
+        <div class="widget">Appointments Today <div class="stat-number" id="stat-1">0</div></div>
+        <div class="widget">Patients Visited <div class="stat-number" id="stat-2">0</div></div>
+        <div class="widget">Pending Reviews <div class="stat-number" id="stat-3">0</div></div>
+      </div>
+
+      <!-- Progress -->
+      <div class="progress-section">
+        <h3>Today's Progress</h3>
+        <div class="progress-title">Patients Seen <span style="float:right;">60%</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width: 60%; background: #38bdf8;"></div></div>
+
+        <div class="progress-title">Reports Reviewed <span style="float:right;">30%</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width: 30%; background: #f472b6;"></div></div>
+
+        <div class="progress-title">Prescriptions Given <span style="float:right;">90%</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width: 90%; background: #4ade80;"></div></div>
+      </div>
+
+      <!-- Completed Appointments + Calendar -->
+      <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
+        <div class="appointments-box" style="flex: 1;">
+          <h3>Completed Appointments</h3>
+          <div class="appointment-entry"><strong>Rahul Verma</strong><br /><small>10:00 AM • Diabetes Follow-up</small></div>
+          <div class="appointment-entry"><strong>Priya Sharma</strong><br /><small>11:30 AM • Asthma Checkup</small></div>
+          <div class="appointment-entry"><strong>Karan Patel</strong><br /><small>1:00 PM • Blood Pressure Review</small></div>
+          <a href="#" style="color: var(--primary); display: block; margin-top: 1rem;">View Full History →</a>
+        </div>
+
+        <div class="calendar" style="flex: 1;">
+          <button class="save-btn" onclick="exportCalendarToPDF()" style="margin-top: 1rem;">🧾 Export Calendar as PDF</button>
+          <button class="save-btn" onclick="exportCalendarAsICS()" style="margin-top: 1rem;">📅 Export Notes as ICS</button>
+
+          <div class="calendar-header">
+            
+            <div>
+              <button onclick="changeMonth(-1)">◀</button>
+              <button onclick="changeMonth(1)">▶</button>
+            </div>
+            <h3 id="monthYear"></h3>
+            
+          </div>
+          <div class="calendar-grid" id="calendarDays"></div>
+        </div>
+      </div>
+
+      <!-- Doctor Availability Scheduler -->
+      <section id="availability-section">
+  <h3>Set Availability</h3>
+  <form id="availabilityForm">
+    <label>Select Available Days:</label><br>
+    <label><input type="checkbox" name="days" value="Monday"> Monday</label>
+    <label><input type="checkbox" name="days" value="Tuesday"> Tuesday</label>
+    <label><input type="checkbox" name="days" value="Wednesday"> Wednesday</label>
+    <label><input type="checkbox" name="days" value="Thursday"> Thursday</label>
+    <label><input type="checkbox" name="days" value="Friday"> Friday</label>
+    <label><input type="checkbox" name="days" value="Saturday"> Saturday</label>
+    <label><input type="checkbox" name="days" value="Sunday"> Sunday</label>
+
+    <br><br>
+    <label>Enter Time Slots (comma separated):</label><br>
+    <input type="text" id="timeSlotsInput" placeholder="e.g. 10:00AM-12:00PM, 3:00PM-5:00PM" />
+    <br><br>
+    <button type="submit">Save Availability</button>
+    <p id="availMsg" style="margin-top: 1rem; color: #38bdf8;"></p>
+  </form>
+</section>
+
+    </main>
+  </div>
+
+  <div id="toast-container"></div>
+  <!-- Calendar Description Modal -->
+<div id="calendarModal" class="modal">
+  <div class="modal-content">
+    <h3>Add Note for <span id="selectedDateLabel"></span></h3>
+    <textarea id="dateNote" rows="4" style="width: 100%; padding: 0.5rem; margin-top: 1rem;"></textarea>
+    <div style="margin-top: 1rem;">
+      <button class="confirm" onclick="saveNote()">Save</button>
+      <button class="cancel" onclick="closeCalendarModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+<div id="appointmentsModal" class="modal" style="display: none;">
+  <div class="modal-content">
+    <span class="close" onclick="closeAppointmentsModal()">&times;</span>
+    <h2>Appointments on <span id="modalDateLabel"></span></h2>
+    <div id="appointmentsList">
+      <p>Loading...</p>
+    </div>
+  </div>
+</div>
+
+
+  <script>
+    function animateValue(id, start, end, duration) {
+      const range = end - start;
+      const increment = end > start ? 1 : -1;
+      const stepTime = Math.abs(Math.floor(duration / range));
+      const obj = document.getElementById(id);
+      let current = start;
+      const timer = setInterval(() => {
+        current += increment;
+        obj.textContent = current;
+        if (current === end) clearInterval(timer);
+      }, stepTime);
+    }
+
+    fetch(`${API_BASE}/dashboard/stats`, {
+  headers: authHeaders()
+})
+  .then(res => res.json())
+  .then(data => {
+    animateValue("stat-1", 0, data.appointmentsToday || 0, 1000);
+    animateValue("stat-2", 0, data.patientsVisited || 0, 1200);
+    animateValue("stat-3", 0, data.pendingReviews || 0, 800);
+  })
+  .catch(err => console.error("Failed to fetch stats:", err));
+
+
+    const calendarDays = document.getElementById("calendarDays");
+    const monthYear = document.getElementById("monthYear");
+    let currentDate = new Date();
+
+    function renderCalendar(date) {
+      const year = date.getFullYear();
+      const month = date.getMonth();
+      const today = new Date();
+
+      monthYear.textContent = date.toLocaleString("default", { month: "long", year: "numeric" });
+      calendarDays.innerHTML = "";
+
+      const firstDay = new Date(year, month, 1).getDay();
+      const lastDate = new Date(year, month + 1, 0).getDate();
+
+      const dayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+      dayLabels.forEach(day => {
+        const div = document.createElement("div");
+        div.className = "calendar-day";
+        div.textContent = day;
+        calendarDays.appendChild(div);
+      });
+
+      for (let i = 0; i < firstDay; i++) {
+        calendarDays.appendChild(document.createElement("div"));
+      }
+
+      for (let d = 1; d <= lastDate; d++) {
+        const div = document.createElement("div");
+div.className = "calendar-date";
+div.textContent = d;
+const formattedDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+div.dataset.date = formattedDate;
+
+div.addEventListener("click", handleDateClick);
+
+        if (d === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
+          div.classList.add("today");
+        }
+
+        calendarDays.appendChild(div);
+      }
+    }
+
+    function changeMonth(direction) {
+      currentDate.setMonth(currentDate.getMonth() + direction);
+      renderCalendar(currentDate);
+    }
+
+    renderCalendar(currentDate);
+function saveAvailability() {
+  const days = Array.from(document.querySelectorAll('input[name="day"]:checked')).map(cb => cb.value);
+  const availability = {
+    days,
+    morning: {
+      start: document.getElementById('timeMorningStart').value,
+      end: document.getElementById('timeMorningEnd').value
+    },
+    evening: {
+      start: document.getElementById('timeEveningStart').value,
+      end: document.getElementById('timeEveningEnd').value
+    }
+  };
+
+  fetch(`${API_BASE}/availability`, {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify(availability)
+  })
+    .then(res => res.json())
+    .then(data => {
+      showToast("Availability saved!", "success");
+    })
+    .catch(err => {
+      showToast("Failed to save availability", "error");
+      console.error(err);
+    });
+}
+
+    // Theme toggle
+    function toggleTheme() {
+      const body = document.body;
+      if (body.classList.contains("dark")) {
+        body.classList.remove("dark");
+        body.classList.add("light");
+      } else {
+        body.classList.remove("light");
+        body.classList.add("dark");
+      }
+      
+    }
+
+    function toggleNotifications() {
+  const panel = document.getElementById("notificationsPanel");
+  panel.style.display = panel.style.display === "block" ? "none" : "block";
+}
+
+// Optional: Click outside to close
+document.addEventListener("click", function(event) {
+  const panel = document.getElementById("notificationsPanel");
+  const icon = document.querySelector(".notification-icon");
+  if (!panel.contains(event.target) && !icon.contains(event.target)) {
+    panel.style.display = "none";
+  }
+});
+    function toggleTheme() {
+      const body = document.body;
+      body.classList.toggle("dark");
+      body.classList.toggle("light");
+    }
+
+    function toggleNotifications() {
+  const panel = document.getElementById("notificationsPanel");
+  const isOpen = panel && panel.style.display === "block";
+  if (panel) {
+    panel.style.display = isOpen ? "none" : "block";
+  }
+
+  // Add pop toast notification
+  showToast("You have new notifications 🔔", "info");
+}
+
+
+    document.addEventListener("click", function (event) {
+      const panel = document.getElementById("notificationsPanel");
+      const icon = document.querySelector(".notification-icon");
+      if (!panel.contains(event.target) && !icon.contains(event.target)) {
+        panel.style.display = "none";
+      }
+    });
+
+    function openLogoutModal() {
+      document.getElementById("logoutModal").style.display = "flex";
+    }
+
+    function closeLogoutModal() {
+      document.getElementById("logoutModal").style.display = "none";
+    }
+
+    function confirmLogout() {
+      window.location.href = "login.html";
+    }
+
+    function showToast(message, type = "info") {
+  const toastContainer = document.getElementById("toast-container");
+  const toast = document.createElement("div");
+  toast.className = "toast";
+  toast.textContent = message;
+
+  if (type === "success") {
+    toast.style.background = "#16a34a"; // green
+  } else if (type === "error") {
+    toast.style.background = "#dc2626"; // red
+  }
+
+  toastContainer.appendChild(toast);
+
+  setTimeout(() => {
+    toast.remove();
+  }, 4000);
+}
+
+
+let selectedDateKey = "";
+
+function handleDateClick(e) {
+  fetch(`${API_BASE}/notes`, {
+    method: "POST",
+    headers: authHeaders(),
+    body: JSON.stringify({ date, text })
+  })
+  .then(res => res.json())
+  .then(() => {
+    alert("Note saved to backend!");
+    updateCalendarMarkers(); // optional
+  })
+  .catch(() => alert("Error saving note"));
+}
+
+function saveNote() {
+  fetch(`${API_BASE}/notes/${date}`, {
+    headers: authHeaders()
+  })
+  .then(res => res.json())
+  .then(note => {
+    document.getElementById("noteTextArea").value = note.text || "";
+  })
+  .catch(() => {
+    document.getElementById("noteTextArea").value = "";
+  });
+}
+
+function closeCalendarModal() {
+  document.getElementById("calendarModal").style.display = "none";
+}
+
+function renderCalendar(date) {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const today = new Date();
+
+    monthYear.textContent = date.toLocaleString("default", { month: "long", year: "numeric" });
+    calendarDays.innerHTML = "";
+
+    const firstDay = new Date(year, month, 1).getDay();
+    const lastDate = new Date(year, month + 1, 0).getDate();
+
+    const dayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    dayLabels.forEach(day => {
+      const div = document.createElement("div");
+      div.className = "calendar-day";
+      div.textContent = day;
+      calendarDays.appendChild(div);
+    });
+
+    for (let i = 0; i < firstDay; i++) {
+      calendarDays.appendChild(document.createElement("div"));
+    }
+
+    for (let d = 1; d <= lastDate; d++) {
+      const div = document.createElement("div");
+      div.className = "calendar-date";
+      div.textContent = d;
+      const formattedDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+      div.dataset.date = formattedDate;
+
+      // Check if note exists for this date
+      if (localStorage.getItem(`note-${formattedDate}`)) {
+        div.classList.add("has-note");
+        const note = localStorage.getItem(`note-${formattedDate}`);
+if (note) {
+  div.classList.add("has-note");
+  div.setAttribute("data-note", note);
+}
+
+      }
+
+      if (d === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
+        div.classList.add("today");
+      }
+
+      div.addEventListener("click", handleDateClick);
+      calendarDays.appendChild(div);
+    }
+  }
+
+  document.querySelectorAll(".calendar-date").forEach(cell => {
+  cell.addEventListener("click", () => {
+    const dateStr = cell.dataset.date;
+    if (dateStr) openAppointmentsModal(dateStr);
+  });
+});
+
+
+  function saveNote() {
+    const note = document.getElementById("dateNote").value.trim();
+    if (note) {
+      localStorage.setItem(selectedDateKey, note);
+      showToast("Note saved successfully!", "success");
+    } else {
+      localStorage.removeItem(selectedDateKey);
+    }
+    closeCalendarModal();
+    renderCalendar(currentDate); // re-render to apply highlight
+  }
+
+  function closeCalendarModal() {
+    document.getElementById("calendarModal").style.display = "none";
+  }
+
+  // Export Calendar as PDF
+function exportCalendarToPDF() {
+  const calendarElement = document.querySelector(".calendar");
+  const opt = {
+    margin:       0.5,
+    filename:     'medconsult-calendar.pdf',
+    image:        { type: 'jpeg', quality: 0.98 },
+    html2canvas:  { scale: 2 },
+    jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+  };
+
+  html2pdf().set(opt).from(calendarElement).save();
+}
+
+function exportCalendarAsICS() {
+  let calendarData = "BEGIN:VCALENDAR\nVERSION:2.0\nCALSCALE:GREGORIAN\nMETHOD:PUBLISH\n";
+
+  for (let key in localStorage) {
+    if (key.startsWith("note-")) {
+      const dateStr = key.replace("note-", "");
+      const note = localStorage.getItem(key);
+
+      // Format to YYYYMMDD
+      const formattedDate = dateStr.replace(/-/g, "");
+      calendarData += `
+BEGIN:VEVENT
+SUMMARY:${note}
+DTSTART;VALUE=DATE:${formattedDate}
+DTEND;VALUE=DATE:${formattedDate}
+DESCRIPTION:${note}
+END:VEVENT
+`;
+    }
+  }
+
+  calendarData += "END:VCALENDAR";
+
+  const blob = new Blob([calendarData], { type: "text/calendar;charset=utf-8" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "medconsult-notes.ics";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  showToast("ICS file exported!", "success");
+}
+
+function openAppointmentsModal(dateStr) {
+  document.getElementById("modalDateLabel").textContent = dateStr;
+  const list = document.getElementById("appointmentsList");
+  list.innerHTML = "<p>Loading...</p>";
+
+  fetch(`${API_BASE}/appointments/date/${dateStr}`, {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
+    }
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (data.length === 0) {
+        list.innerHTML = "<p>No appointments for this day.</p>";
+        return;
+      }
+
+      list.innerHTML = data.map(app => `
+  <div style="margin-bottom: 10px; border-bottom: 1px solid #475569; padding-bottom: 5px;">
+    <strong>${app.patient}</strong><br>
+    Time: ${app.time}<br>
+    Concern: ${app.concern}<br>
+    <button onclick="showEditForm('${app._id}', '${app.time}', '${app.concern}')">✏️ Edit</button>
+    <button onclick="cancelAppointment('${app._id}')">❌ Cancel</button>
+    <div id="edit-form-${app._id}" style="display: none; margin-top: 8px;">
+      <input type="text" id="edit-time-${app._id}" value="${app.time}" placeholder="New Time" />
+      <input type="text" id="edit-concern-${app._id}" value="${app.concern}" placeholder="New Concern" />
+      <button onclick="submitEdit('${app._id}')">✅ Save</button>
+    </div>
+  </div>
+`).join('');
+
+    })
+    .catch(() => {
+      list.innerHTML = "<p>Error loading appointments.</p>";
+    });
+
+  document.getElementById("appointmentsModal").style.display = "flex";
+}
+
+function closeAppointmentsModal() {
+  document.getElementById("appointmentsModal").style.display = "none";
+}
+
+window.onclick = function (e) {
+  const modal = document.getElementById("appointmentsModal");
+  if (e.target === modal) closeAppointmentsModal();
+};
+
+
+// Example (Express.js)
+router.get('/dashboard/stats', verifyToken, async (req, res) => {
+  const doctorId = req.user.id;
+  const today = new Date().toISOString().slice(0, 10);
+
+  const appointmentsToday = await Appointment.countDocuments({ doctorId, date: today });
+  const patientsVisited = await Patient.countDocuments({ doctorId });
+  const pendingReviews = await Prescription.countDocuments({ doctorId, reviewed: false });
+
+  res.json({ appointmentsToday, patientsVisited, pendingReviews });
+});
+
+router.post('/availability', verifyToken, async (req, res) => {
+  const doctorId = req.user.id;
+  const data = req.body;
+
+  await Doctor.findByIdAndUpdate(doctorId, { availability: data });
+  res.json({ message: "Availability updated" });
+});
+
+fetch(`${API_BASE}/appointments/completed`, {
+  headers: authHeaders()
+})
+  .then(res => res.json())
+  .then(data => {
+    const container = document.querySelector(".appointments-box");
+    const listHTML = data.map(app => `
+      <div class="appointment-entry">
+        <strong>${app.patientName}</strong><br />
+        <small>${app.time} • ${app.reason}</small>
+      </div>
+    `).join('');
+    container.innerHTML += listHTML;
+  })
+  .catch(err => console.error("Failed to load completed appointments", err));
+
+  router.get('/appointments/completed', verifyToken, async (req, res) => {
+  const doctorId = req.user.id;
+  const appointments = await Appointment.find({ doctorId, status: 'completed' });
+  res.json(appointments);
+});
+
+ const noteArea = document.getElementById('doctorNote');
+  const saveStatus = document.getElementById('saveStatus');
+  const todayKey = 'doctorNote_' + new Date().toISOString().split('T')[0];
+
+  // Load saved note
+  const savedNote = localStorage.getItem(todayKey);
+  if (savedNote) {
+    noteArea.value = savedNote;
+    saveStatus.textContent = '✔️ Loaded saved note.';
+  }
+
+  // Autosave
+  noteArea.addEventListener('input', () => {
+    localStorage.setItem(todayKey, noteArea.value);
+    saveStatus.textContent = '💾 Saved locally at ' + new Date().toLocaleTimeString();
+  });
+
+  const API_BASE = 'https://medconsult-api.onrender.com';
+
+// Fetch & populate existing availability
+document.addEventListener('DOMContentLoaded', () => {
+  fetch(`${API_BASE}/availability`, {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
+    }
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (data.days && Array.isArray(data.days)) {
+        data.days.forEach(day => {
+          const checkbox = document.querySelector(`input[name="days"][value="${day}"]`);
+          if (checkbox) checkbox.checked = true;
+        });
+        disableUnavailableDays(data.days);
+        function highlightDatesWithNotes() {
+  const notes = JSON.parse(localStorage.getItem('med_notes') || '{}');
+  const dateCells = document.querySelectorAll('.calendar-date');
+
+  dateCells.forEach(cell => {
+    const cellDate = cell.dataset.date;
+    if (notes[cellDate]) {
+      cell.classList.add('has-note');
+    }
+  });
+}
+
+      }
+      if (data.timeSlots) {
+        document.getElementById("timeSlotsInput").value = data.timeSlots.join(', ');
+      }
+    });
+      highlightDatesWithNotes();
+      highlightUpcomingAppointments();
+      function highlightUpcomingAppointments() {
+  fetch(`${API_BASE}/appointments/upcoming`, {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
+    }
+  })
+    .then(res => res.json())
+    .then(appointments => {
+      const calendarCells = document.querySelectorAll('.calendar-date');
+
+      appointments.forEach(appointment => {
+        const dateStr = appointment.date; // should be 'YYYY-MM-DD'
+        calendarCells.forEach(cell => {
+          if (cell.dataset.date === dateStr) {
+            cell.classList.add('has-appointment');
+          }
+        });
+      });
+    })
+    .catch(err => console.error("Error loading appointments:", err));
+}
+
+});
+
+// Handle form submission
+document.getElementById("availabilityForm").addEventListener("submit", async function (e) {
+  e.preventDefault();
+  const checkedDays = Array.from(document.querySelectorAll('input[name="days"]:checked')).map(cb => cb.value);
+  const timeSlots = document.getElementById("timeSlotsInput").value.split(',').map(s => s.trim());
+  
+  const res = await fetch(`${API_BASE}/availability`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
+    },
+    body: JSON.stringify({ days: checkedDays, timeSlots })
+  });
+
+  const result = await res.json();
+  document.getElementById("availMsg").textContent = res.ok ? "✅ Availability updated!" : result.error;
+});
+
+function showEditForm(id, time, concern) {
+  const form = document.getElementById(`edit-form-${id}`);
+  form.style.display = (form.style.display === 'none') ? 'block' : 'none';
+}
+
+function submitEdit(id) {
+  const newTime = document.getElementById(`edit-time-${id}`).value;
+  const newConcern = document.getElementById(`edit-concern-${id}`).value;
+
+  fetch(`${API_BASE}/appointments/${id}`, {
+    method: 'PUT',
+    headers: {
+      ...authHeaders(),
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ time: newTime, concern: newConcern })
+  })
+  .then(res => res.json())
+  .then(() => {
+    alert('Appointment updated');
+    openAppointmentsModal(document.getElementById("modalDateLabel").textContent); // refresh
+  })
+  .catch(() => alert("Error updating appointment"));
+}
+
+function cancelAppointment(id) {
+  if (!confirm("Are you sure you want to cancel this appointment?")) return;
+
+  fetch(`${API_BASE}/appointments/${id}`, {
+    method: 'DELETE',
+    headers: authHeaders()
+  })
+  .then(res => res.json())
+  .then(() => {
+    alert('Appointment cancelled');
+    openAppointmentsModal(document.getElementById("modalDateLabel").textContent); // refresh
+  })
+  .catch(() => alert("Error cancelling appointment"));
+}
+
+
+  </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
