@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Patients - MedConsult</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    :root {
+      --card-bg: #1e293b;
+      --input-bg: #334155;
+      --text-muted: #94a3b8;
+      --primary: #38bdf8;
+      --highlight: #f43f5e;
+      --shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    body.dark {
+      background: #0f172a;
+      color: #f1f5f9;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+    }
+
+    header.header {
+      background: var(--card-bg);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: var(--shadow);
+    }
+
+    .dashboard-layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    aside.sidebar {
+      width: 220px;
+      background: var(--input-bg);
+      padding-top: 1rem;
+      box-shadow: var(--shadow);
+      flex-shrink: 0;
+    }
+
+    aside.sidebar ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    aside.sidebar a {
+      color: white;
+      text-decoration: none;
+      padding: 0.8rem 1.5rem;
+      display: block;
+    }
+
+    aside.sidebar a.active,
+    aside.sidebar a:hover {
+      background: var(--primary);
+      border-radius: 4px;
+    }
+
+    main.dashboard-content {
+      flex: 1;
+      padding: 2rem;
+    }
+
+    h2 {
+      margin-top: 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--card-bg);
+      color: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    th, td {
+      padding: 1rem;
+      border-bottom: 1px solid var(--input-bg);
+      text-align: left;
+    }
+
+    th {
+      background: #1e293b;
+      color: var(--text-muted);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .btn.view {
+      background: var(--primary);
+      color: white;
+      padding: 0.4rem 1rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(15, 23, 42, 0.85);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+    }
+
+    .modal-content {
+      background: var(--card-bg);
+      padding: 2rem;
+      border-radius: 10px;
+      width: 400px;
+      box-shadow: var(--shadow);
+      color: white;
+      position: relative;
+    }
+
+    .modal-content h2 {
+      margin-top: 0;
+      margin-bottom: 1rem;
+    }
+
+    .modal-content .close {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    .print-btn {
+      background: var(--highlight);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 1rem;
+    }
+
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #printableContent, #printableContent * {
+        visibility: visible;
+      }
+      #printableContent {
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+    }
+
+    /* Loader Overlay */
+#loader-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #0f172a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  transition: opacity 0.5s ease;
+}
+
+body.light #loader-overlay {
+  background: #f8fafc;
+}
+
+.spinner {
+  border: 4px solid #94a3b8;
+  border-top: 4px solid var(--primary);
+  border-radius: 50%;
+  width: 45px;
+  height: 45px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+  </style>
+</head>
+<body class="dark">
+  <div id="loader-overlay">
+  <div class="spinner"></div>
+</div>
+  <header class="header">
+    <h1>MedConsult</h1>
+    <a href="login.html" class="logout-link" style="color: #f87171;">Logout</a>
+  </header>
+
+  <div class="dashboard-layout">
+    <aside class="sidebar">
+      <ul>
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="appointments.html">Appointments</a></li>
+        <li><a href="patients.html" class="active">Patients</a></li>
+        <li><a href="prescriptions.html">Prescriptions</a></li>
+        <li><a href="settings.html">Settings</a></li>
+        <li><a href="doctor-profile.html">Profile</a></li>
+      </ul>
+    </aside>
+
+    <main class="dashboard-content">
+      <h2>Patient List</h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Age</th>
+            <th>Contact</th>
+            <th>Condition</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="patientTableBody">
+         
+        </tbody>
+      </table>
+    </main>
+  </div>
+
+  <!-- Patient Detail Modal -->
+  <div id="patientModal" class="modal" role="dialog" aria-modal="true">
+    <div class="modal-content" id="printableContent">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <h2 id="modalName">Patient Name</h2>
+      <p><strong>Age:</strong> <span id="modalAge"></span></p>
+      <p><strong>Contact:</strong> <span id="modalContact"></span></p>
+      <p><strong>Condition:</strong> <span id="modalCondition"></span></p>
+      <p><strong>History:</strong> <span id="modalHistory"></span></p>
+      <button class="print-btn" onclick="window.print()">🖨️ Print / Export</button>
+    </div>
+  </div>
+
+ <script>
+  // Hide loader on page load
+  window.addEventListener("load", function () {
+    const loader = document.getElementById("loader-overlay");
+    loader.style.opacity = 0;
+    setTimeout(() => loader.style.display = "none", 500);
+  });
+
+  // Fetch and render patients
+  const tbody = document.getElementById("patientTableBody");
+
+  fetch('https://medconsult-api.onrender.com/patients')
+    .then(res => res.json())
+    .then(patients => {
+      tbody.innerHTML = patients.map(p => `
+        <tr data-name="${p.name}" data-age="${p.age}" data-contact="${p.contact}" data-condition="${p.condition}" data-history="${p.history}">
+          <td>${p.name}</td>
+          <td>${p.age}</td>
+          <td>${p.contact}</td>
+          <td>${p.condition}</td>
+          <td><a class="btn view" href="patient-details.html?id=${p._id}">View</a></td>
+        </tr>
+      `).join('');
+    })
+    .catch(err => {
+      console.error("Error fetching patients:", err);
+      tbody.innerHTML = '<tr><td colspan="5">Error loading patients</td></tr>';
+    });
+
+  // Modal functions
+  function openModal(btn) {
+    const row = btn.closest("tr");
+    document.getElementById("modalName").textContent = row.dataset.name;
+    document.getElementById("modalAge").textContent = row.dataset.age;
+    document.getElementById("modalContact").textContent = row.dataset.contact;
+    document.getElementById("modalCondition").textContent = row.dataset.condition;
+    document.getElementById("modalHistory").textContent = row.dataset.history;
+    document.getElementById("patientModal").style.display = "flex";
+  }
+
+  function closeModal() {
+    document.getElementById("patientModal").style.display = "none";
+  }
+
+  window.onclick = function (e) {
+    if (e.target === document.getElementById("patientModal")) {
+      closeModal();
+    }
+  };
+</script>
+
+</body>
+</html>

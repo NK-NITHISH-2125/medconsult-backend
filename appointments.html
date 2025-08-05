@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Appointments - MedConsult</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* Loader Overlay */
+    #loader-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: #0f172a;
+      display: flex; justify-content: center; align-items: center;
+      z-index: 99999;
+      transition: opacity 0.5s ease;
+    }
+    body.light #loader-overlay {
+      background: #f8fafc;
+    }
+    .spinner {
+      border: 4px solid #94a3b8;
+      border-top: 4px solid #38bdf8;
+      border-radius: 50%;
+      width: 45px; height: 45px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); }
+    }
+
+    .appointment-card {
+      background: var(--card-bg);
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      margin-bottom: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    body.light .appointment-card {
+      background: var(--light-card);
+      color: var(--light-text);
+    }
+    .actions button {
+      margin-left: 0.5rem;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .accept { background: #4ade80; color: white; }
+    .reject { background: #ef4444; color: white; }
+
+    #toast-container {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      z-index: 9999;
+    }
+    .toast {
+      background: #0f172a;
+      color: #fff;
+      padding: 0.75rem 1.25rem;
+      margin-top: 10px;
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      animation: fadein 0.3s ease, fadeout 0.5s ease 3s;
+      font-size: 0.95rem;
+      min-width: 200px;
+    }
+    @keyframes fadein {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeout {
+      from { opacity: 1; transform: translateY(0); }
+      to { opacity: 0; transform: translateY(20px); }
+    }
+  </style>
+</head>
+<body class="dark">
+  <div id="loader-overlay"><div class="spinner"></div></div>
+
+  <header class="header">
+    <h1>MedConsult</h1>
+    <div style="display:flex; align-items:center;">
+      <button id="themeToggleBtn" class="theme-toggle-btn" title="Toggle Theme">🌙</button>
+      <a href="#" onclick="openLogoutModal()" style="color: #f87171; margin-left: 1rem;">Logout</a>
+    </div>
+  </header>
+
+  <div class="dashboard-layout">
+    <aside class="sidebar">
+      <ul>
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="appointments.html" class="active">Appointments</a></li>
+        <li><a href="patients.html">Patients</a></li>
+        <li><a href="prescriptions.html">Prescriptions</a></li>
+        <li><a href="settings.html">Settings</a></li>
+        <li><a href="doctor-profile.html">Profile</a></li>
+      </ul>
+    </aside>
+
+    <main class="dashboard-content">
+      <h2>Manage Appointments</h2>
+      <div id="appointmentsContainer"></div>
+    </main>
+  </div>
+
+  <!-- Toasts -->
+  <div id="toast-container"></div>
+
+  <!-- Logout Confirmation Modal -->
+  <div id="logoutModal" class="modal">
+    <div class="modal-content">
+      <p>Are you sure you want to logout?</p>
+      <button class="confirm" onclick="confirmLogout()">Yes, Logout</button>
+      <button class="cancel" onclick="closeLogoutModal()">Cancel</button>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = 'https://medconsult-api.onrender.com';
+    function authHeaders() {
+      return {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + localStorage.getItem('token')
+      };
+    }
+
+    // Hide loader
+    window.addEventListener("load", function() {
+      const loader = document.getElementById("loader-overlay");
+      loader.style.opacity = 0;
+      setTimeout(() => loader.style.display = "none", 500);
+    });
+
+    // Theme toggle
+    const themeToggle = document.getElementById("themeToggleBtn");
+    if (localStorage.getItem("theme") === "light") {
+      document.body.classList.remove("dark");
+      document.body.classList.add("light");
+      themeToggle.textContent = "☀️";
+    }
+    themeToggle.addEventListener("click", () => {
+      document.body.classList.toggle("dark");
+      document.body.classList.toggle("light");
+      const newTheme = document.body.classList.contains("dark") ? "dark" : "light";
+      localStorage.setItem("theme", newTheme);
+      themeToggle.textContent = newTheme === "dark" ? "🌙" : "☀️";
+    });
+
+    function showToast(message, type = "info") {
+      const container = document.getElementById("toast-container");
+      const toast = document.createElement("div");
+      toast.className = "toast";
+      toast.textContent = message;
+      if (type === "success") toast.style.background = "#16a34a";
+      if (type === "error") toast.style.background = "#dc2626";
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 4000);
+    }
+
+    function openLogoutModal() {
+      document.getElementById("logoutModal").style.display = "flex";
+    }
+
+    function closeLogoutModal() {
+      document.getElementById("logoutModal").style.display = "none";
+    }
+
+    function confirmLogout() {
+      localStorage.removeItem("token");
+      window.location.href = "login.html";
+    }
+
+    function loadAppointments() {
+      fetch(`${API_BASE}/appointments`, {
+        headers: authHeaders()
+      })
+      .then(res => res.json())
+      .then(data => {
+        const container = document.getElementById("appointmentsContainer");
+        if (!data.length) {
+          container.innerHTML = "<p>No upcoming appointments.</p>";
+          return;
+        }
+
+        container.innerHTML = data.map(app => `
+          <div class="appointment-card" data-id="${app._id}">
+            <div>
+              <h3>${app.patientName}</h3>
+              <p>Time: ${app.time} | Date: ${app.date}</p>
+              <p>Concern: ${app.reason}</p>
+            </div>
+            <div class="actions">
+              <button class="accept" onclick="handleAccept('${app._id}')">Accept</button>
+              <button class="reject" onclick="handleReject('${app._id}')">Reject</button>
+            </div>
+          </div>
+        `).join('');
+      })
+      .catch(err => {
+        showToast("Failed to load appointments", "error");
+        console.error(err);
+      });
+    }
+
+    function handleAccept(id) {
+      fetch(`${API_BASE}/appointments/${id}/accept`, {
+        method: "PATCH",
+        headers: authHeaders()
+      })
+      .then(res => res.json())
+      .then(() => {
+        showToast("Appointment accepted", "success");
+        loadAppointments();
+      })
+      .catch(() => showToast("Error accepting appointment", "error"));
+    }
+
+    function handleReject(id) {
+      fetch(`${API_BASE}/appointments/${id}/reject`, {
+        method: "PATCH",
+        headers: authHeaders()
+      })
+      .then(res => res.json())
+      .then(() => {
+        showToast("Appointment rejected", "success");
+        loadAppointments();
+      })
+      .catch(() => showToast("Error rejecting appointment", "error"));
+    }
+
+    // Init
+    loadAppointments();
+  </script>
+</body>
+</html>

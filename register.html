@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Register - MedConsult</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+<body class="dark">
+  <button class="theme-toggle" onclick="toggleTheme()">
+    <i class="fas fa-moon"></i>
+  </button>
+
+  <div class="auth-container">
+    <h2>Create an Account</h2>
+    <form>
+      <label for="fullname">Full Name</label>
+      <input type="text" id="fullname" required placeholder="Dr. Nithish Kumar" />
+
+      <label for="email">Email Address</label>
+      <input type="email" id="email" required placeholder="doctor@example.com" />
+
+      <label for="mobile">Mobile Number</label>
+      <div class="mobile-wrap">
+        <select id="countryCode" required>
+          <option value="+91">+91 🇮🇳</option>
+          <option value="+1">+1 🇺🇸</option>
+          <option value="+44">+44 🇬🇧</option>
+          <option value="+61">+61 🇦🇺</option>
+          <option value="+81">+81 🇯🇵</option>
+        </select>
+        <input type="tel" id="mobile" required pattern="[0-9]{10}" placeholder="9876543210" />
+      </div>
+
+      <label for="speciality">Speciality</label>
+      <select id="speciality" required>
+        <option value="">-- Select Speciality --</option>
+        <option value="General Physician">General Physician</option>
+        <option value="Cardiologist">Cardiologist</option>
+        <option value="Neurologist">Neurologist</option>
+        <option value="Dermatologist">Dermatologist</option>
+        <option value="Psychiatrist">Psychiatrist</option>
+        <option value="Orthopedic">Orthopedic</option>
+      </select>
+
+      <label for="license">Medical License Number</label>
+      <input type="text" id="license" required placeholder="e.g. TN-2025-456789" />
+
+      <label for="password">Password</label>
+      <input type="password" id="password" required placeholder="••••••••" />
+      <div id="strength"></div>
+
+      <label for="confirm">Confirm Password</label>
+      <input type="password" id="confirm" required placeholder="••••••••" />
+
+      <button class="btn primary">Register</button>
+    </form>
+    <p>Already have an account? <a href="login.html">Login here</a></p>
+  </div>
+
+  <script>
+    function toggleTheme() {
+      document.body.classList.toggle("dark");
+    }
+
+    const password = document.getElementById('password');
+    const strength = document.getElementById('strength');
+
+    password.addEventListener('input', () => {
+      const val = password.value;
+      let score = 0;
+      if (val.length >= 8) score++;
+      if (/[A-Z]/.test(val)) score++;
+      if (/[a-z]/.test(val)) score++;
+      if (/[0-9]/.test(val)) score++;
+      if (/[\W_]/.test(val)) score++;
+
+      const levels = ["Very Weak", "Weak", "Moderate", "Strong", "Very Strong"];
+      const colors = ["#e53935", "#fb8c00", "#fdd835", "#43a047", "#1e88e5"];
+      strength.textContent = "Strength: " + (levels[score - 1] || "");
+      strength.style.color = colors[score - 1] || "#fff";
+    });
+
+    const verifyToken = require('../middleware/verifyToken');
+
+router.get('/patients', verifyToken, async (req, res) => {
+  const patients = await Patient.find({ doctorId: req.user.id });
+  res.json(patients);
+});
+
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Doctor Login - MedConsult</title>
+  <link rel="stylesheet" href="#" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #0f172a;
+      color: #f1f5f9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    .login-container {
+      background: #1e293b;
+      padding: 2rem;
+      border-radius: 10px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    }
+
+    .login-container h2 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .login-container input[type="email"],
+    .login-container input[type="password"] {
+      width: 100%;
+      padding: 0.8rem;
+      margin-bottom: 1rem;
+      border-radius: 6px;
+      border: none;
+      background: #334155;
+      color: white;
+      font-size: 1rem;
+    }
+
+    .login-container button {
+      width: 100%;
+      padding: 0.8rem;
+      background: #38bdf8;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      color: #0f172a;
+      cursor: pointer;
+    }
+
+    .error {
+      color: #f87171;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    .remember-me {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+    }
+
+    .remember-me input {
+      margin-right: 6px;
+    }
+
+    .oauth-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      margin-top: 1rem;
+    }
+
+    .oauth-buttons button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 6px;
+      padding: 0.6rem;
+      cursor: pointer;
+    }
+
+    .google-btn {
+      background: #ffffff;
+      color: #0f172a;
+    }
+
+    .facebook-btn {
+      background: #3b82f6;
+      color: white;
+    }
+
+    .register-link {
+      margin-top: 1rem;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+
+    .register-link a {
+      color: #38bdf8;
+      text-decoration: none;
+    }
+
+    .register-link a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <h2>Doctor Login</h2>
+    <div id="error" class="error"></div>
+
+    <input type="email" id="email" placeholder="Email" required />
+    <input type="password" id="password" placeholder="Password" required />
+
+    <div class="remember-me">
+      <input type="checkbox" id="rememberMe" />
+      <label for="rememberMe">Remember Me</label>
+    </div>
+
+    <div class="forgot-password-link" style="text-align: center; margin-top: 0.8rem;">
+  <a href="forgot-password.html" style="color: #94a3b8; font-size: 0.9rem;">Forgot Password?</a>
+</div>
+
+    <button onclick="login()">Login</button>
+
+    <div class="oauth-buttons">
+      <button class="google-btn" onclick="alert('Google Sign-in coming soon')">🔵 Sign in with Google</button>
+      <button class="facebook-btn" onclick="alert('Facebook Sign-in coming soon')">🔵 Sign in with Facebook</button>
+    </div>
+
+    <div class="register-link">
+      Don't have an account? <a href="register.html">Register now</a>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = 'https://medconsult-api.onrender.com';
+
+    // Autofill if remembered
+    window.addEventListener('DOMContentLoaded', () => {
+      if (localStorage.getItem("rememberMe") === "true") {
+        document.getElementById("email").value = localStorage.getItem("rememberedEmail") || "";
+        document.getElementById("rememberMe").checked = true;
+      }
+    });
+
+    function login() {
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const rememberMe = document.getElementById('rememberMe').checked;
+      const errorDiv = document.getElementById('error');
+
+      if (!email || !password) {
+        errorDiv.textContent = "Please enter email and password.";
+        return;
+      }
+
+      fetch(`${API_BASE}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.token) {
+            localStorage.setItem('token', data.token);
+
+            // Remember email if checked
+            if (rememberMe) {
+              localStorage.setItem("rememberMe", "true");
+              localStorage.setItem("rememberedEmail", email);
+            } else {
+              localStorage.removeItem("rememberMe");
+              localStorage.removeItem("rememberedEmail");
+            }
+
+            window.location.href = 'dashboard.html';
+          } else {
+            errorDiv.textContent = data.error || 'Login failed';
+          }
+        })
+        .catch(() => {
+          errorDiv.textContent = "Something went wrong. Try again.";
+        });
+    }
+
+    const verifyToken = require('../middleware/verifyToken');
+
+router.get('/patients', verifyToken, async (req, res) => {
+  const patients = await Patient.find({ doctorId: req.user.id });
+  res.json(patients);
+});
+
+
+  </script>
+</body>
+</html>

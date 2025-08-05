@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Prescriptions - MedConsult</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* Loader Overlay */
+#loader-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #0f172a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  transition: opacity 0.5s ease;
+}
+
+body.light #loader-overlay {
+  background: #f8fafc;
+}
+
+.spinner {
+  border: 4px solid #94a3b8;
+  border-top: 4px solid var(--primary);
+  border-radius: 50%;
+  width: 45px;
+  height: 45px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+  </style>
+</head>
+<body class="dark">
+  <div id="loader-overlay">
+  <div class="spinner"></div>
+</div>
+  <header class="header">
+    <h1>MedConsult</h1>
+    <a href="dashboard.html">🔙 Back to Dashboard</a>
+  </header>
+
+  <div class="dashboard-layout">
+    <aside class="sidebar">
+      <ul>
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="appointments.html">Appointments</a></li>
+        <li><a href="patients.html">Patients</a></li>
+        <li><a href="prescriptions.html" class="active">Prescriptions</a></li>
+        <li><a href="settings.html">Settings</a></li>
+         <li><a href="doctor-profile.html">Profile</a></li>
+      </ul>
+    </aside>
+
+    <main class="dashboard-content">
+      <h2>Prescriptions</h2>
+
+      <div class="prescription-upload">
+        <label for="patient">Select Patient:</label>
+        <select id="patient"></select>
+        <label for="notes">Prescription Notes:</label>
+        <textarea id="notes" placeholder="Write the prescription here..."></textarea>
+
+        <button class="btn upload" onclick="uploadPrescription()">Upload Prescription</button>
+
+      </div>
+
+      <div class="prescription-list">
+        <h3>Recent Prescriptions</h3>
+        <ul>
+          <li><strong>John Doe:</strong> Paracetamol 500mg twice a day</li>
+          <li><strong>Maria Lee:</strong> ECG advised, avoid stress</li>
+          <li><strong>Alex Brown:</strong> Continue BP meds, follow-up next week</li>
+        </ul>
+      </div>
+    </main>
+  </div>
+  <script src="script.js"></script>
+  <script>
+    function loadPatients() {
+  fetch(`${API_BASE}/patients`, {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem("token")}`
+    }
+  })
+  .then(res => res.json())
+  .then(patients => {
+    const select = document.getElementById("patient");
+    select.innerHTML = patients.map(p => 
+      `<option value="${p.name}">${p.name}</option>`
+    ).join('');
+  })
+  .catch(err => console.error("Error loading patients:", err));
+}
+
+
+function uploadPrescription() {
+  const patient = document.getElementById('patient').value;
+  const notes = document.getElementById('notes').value.trim();
+
+  if (!patient || !notes) {
+    alert("Please fill in all fields.");
+    return;
+  }
+
+  fetch(`${API_BASE}/prescriptions`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${localStorage.getItem("token")}`
+  },
+  body: JSON.stringify({ patientName: patient, notes })
+})
+
+  .then(res => res.json())
+  .then(data => {
+    document.getElementById('notes').value = '';
+    alert(data.message);
+    loadPrescriptions(); // reload the recent list
+  })
+  .catch(err => {
+  console.error(err);
+  alert("Error uploading prescription. Please try again.");
+});
+
+}
+
+function loadPrescriptions() {
+  fetch(`${API_BASE}/prescriptions`)
+
+    .then(res => res.json())
+    .then(prescriptions => {
+      const list = document.querySelector('.prescription-list ul');
+      list.innerHTML = prescriptions.map(p => `<li><strong>${p.patientName}:</strong> ${p.notes}</li>`).join('');
+    });
+}
+
+window.addEventListener("load", () => {
+  const loader = document.getElementById("loader-overlay");
+  loader.style.opacity = 0;
+  setTimeout(() => loader.style.display = "none", 500);
+  loadPatients();
+  loadPrescriptions();
+});
+  </script>
+</body>
+</html>

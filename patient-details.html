@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Patient Details - MedConsult</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body.dark {
+      background: #0f172a;
+      color: #f1f5f9;
+    }
+
+    body.light {
+      background: #f8fafc;
+      color: #0f172a;
+    }
+
+    .header {
+      background: #1e293b;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    body.light .header {
+      background: #cbd5e1;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 3rem auto;
+      background: #1e293b;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    }
+
+    body.light .container {
+      background: #ffffff;
+      color: #0f172a;
+    }
+
+    h2 {
+      margin-top: 0;
+      font-size: 1.6rem;
+    }
+
+    p {
+      font-size: 1rem;
+      margin: 0.5rem 0;
+    }
+
+    .btn {
+      display: inline-block;
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      background: #38bdf8;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .btn.secondary {
+      background: #94a3b8;
+    }
+
+    #loader {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: #0f172a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+
+    .spinner {
+      border: 4px solid #94a3b8;
+      border-top: 4px solid #38bdf8;
+      border-radius: 50%;
+      width: 45px;
+      height: 45px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @media print {
+      body * { visibility: hidden; }
+      .container, .container * {
+        visibility: visible;
+      }
+      .container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body class="dark">
+  <div id="loader"><div class="spinner"></div></div>
+
+  <header class="header">
+    <h1>Patient Details</h1>
+    <div>
+      <button id="toggleTheme" class="btn secondary">☀️</button>
+      <a href="patients.html" class="btn secondary">← Back</a>
+    </div>
+  </header>
+
+  <div class="container" id="patientDetails">
+    <h2 id="name">Loading...</h2>
+    <p><strong>Age:</strong> <span id="age">-</span></p>
+    <p><strong>Gender:</strong> <span id="gender">-</span></p>
+    <p><strong>Contact:</strong> <span id="contact">-</span></p>
+    <p><strong>Condition:</strong> <span id="condition">-</span></p>
+    <p><strong>Medical History:</strong></p>
+    <p id="history">-</p>
+    <hr style="margin: 2rem 0; border-color: var(--text-muted);">
+
+<h3>Doctor's Private Notes</h3>
+<textarea id="patientNote" placeholder="Write your private notes for this patient..." rows="6" style="width: 100%; padding: 0.8rem; border-radius: 6px; background: #334155; color: white; font-size: 1rem; border: none;"></textarea>
+<p id="noteStatus" style="font-size: 0.9rem; color: #94a3b8; margin-top: 5px;"></p>
+
+
+    <button class="btn" onclick="window.print()">🖨️ Print / Export</button>
+  </div>
+
+  <script>
+    // Theme
+    const toggleBtn = document.getElementById("toggleTheme");
+    const body = document.body;
+    if (localStorage.getItem("theme") === "light") {
+      body.classList.remove("dark");
+      body.classList.add("light");
+      toggleBtn.textContent = "🌙";
+    }
+
+    toggleBtn.addEventListener("click", () => {
+      body.classList.toggle("light");
+      body.classList.toggle("dark");
+      const theme = body.classList.contains("light") ? "light" : "dark";
+      localStorage.setItem("theme", theme);
+      toggleBtn.textContent = theme === "light" ? "🌙" : "☀️";
+    });
+
+    // Get ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const patientId = urlParams.get('id');
+
+    if (!patientId) {
+      alert("Patient ID missing from URL.");
+      window.location.href = "patients.html";
+    }
+
+    // Fetch patient details
+    fetch(`https://medconsult-api.onrender.com/patients/${patientId}`)
+      .then(res => res.json())
+      .then(p => {
+        document.getElementById("loader").style.display = "none";
+        document.getElementById("name").textContent = p.name;
+        document.getElementById("age").textContent = p.age;
+        document.getElementById("gender").textContent = p.gender || "-";
+        document.getElementById("contact").textContent = p.contact;
+        document.getElementById("condition").textContent = p.condition;
+        document.getElementById("history").textContent = p.history || "No history available.";
+      })
+      .catch(err => {
+        console.error(err);
+        alert("Failed to load patient data.");
+        window.location.href = "patients.html";
+      });
+
+      // 👇 LocalStorage Autosave for Patient Notes
+const noteField = document.getElementById('patientNote');
+const noteStatus = document.getElementById('noteStatus');
+const noteKey = 'doctorNote_' + patientId;
+
+// Load note if it exists
+const existingNote = localStorage.getItem(noteKey);
+if (existingNote) {
+  noteField.value = existingNote;
+  noteStatus.textContent = '✔️ Loaded saved note.';
+}
+
+// Save on input
+noteField.addEventListener('input', () => {
+  localStorage.setItem(noteKey, noteField.value);
+  noteStatus.textContent = '💾 Saved at ' + new Date().toLocaleTimeString();
+});
+
+  </script>
+</body>
+</html>

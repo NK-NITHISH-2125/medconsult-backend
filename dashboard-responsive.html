@@ -1,0 +1,442 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard - MedConsult</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    :root {
+      --card-bg: #1e293b;
+      --input-bg: #334155;
+      --text-muted: #94a3b8;
+      --primary: #38bdf8;
+      --highlight: #f43f5e;
+      --shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      --bright-bg: #f8fafc;
+      --bright-text: #1e293b;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    body.dark {
+      background: #0f172a;
+      color: #f1f5f9;
+    }
+
+    body.light {
+      background: var(--bright-bg);
+      color: var(--bright-text);
+    }
+
+    header.header {
+      background: var(--card-bg);
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: var(--shadow);
+    }
+
+    .theme-toggle {
+      cursor: pointer;
+      background: transparent;
+      border: none;
+      font-size: 18px;
+      color: inherit;
+    }
+
+    .dashboard-layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    aside.sidebar {
+      width: 220px;
+      background: var(--input-bg);
+      padding-top: 1rem;
+      box-shadow: var(--shadow);
+      flex-shrink: 0;
+      transition: transform 0.3s ease;
+    }
+
+    aside.sidebar ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    aside.sidebar a {
+      color: white;
+      text-decoration: none;
+      padding: 0.8rem 1.5rem;
+      display: block;
+    }
+
+    aside.sidebar a.active,
+    aside.sidebar a:hover {
+      background: var(--primary);
+      border-radius: 4px;
+    }
+
+    .sidebar-toggle {
+      display: none;
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    .dashboard-content {
+      flex: 1;
+      padding: 2rem;
+    }
+
+    .widgets {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .widget {
+      flex: 1;
+      background: var(--card-bg);
+      padding: 1rem;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 18px;
+      box-shadow: var(--shadow);
+      min-width: 180px;
+    }
+
+    .stat-number {
+      font-size: 28px;
+      font-weight: bold;
+      margin-top: 0.5rem;
+      color: var(--primary);
+    }
+
+    .progress-section {
+      margin-bottom: 2rem;
+    }
+
+    .progress-title {
+      font-weight: bold;
+      margin: 0.5rem 0;
+    }
+
+    .progress-bar {
+      background: #1e293b;
+      border-radius: 10px;
+      height: 10px;
+      margin-bottom: 1rem;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 10px;
+    }
+
+    .calendar, .appointments-box {
+      background: var(--card-bg);
+      border-radius: 10px;
+      padding: 1rem;
+      box-shadow: var(--shadow);
+      flex: 1;
+      min-width: 280px;
+    }
+
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0.5rem;
+    }
+
+    .calendar-day,
+    .calendar-date {
+      text-align: center;
+      padding: 0.5rem 0;
+    }
+
+    .calendar-day {
+      font-weight: bold;
+      color: var(--text-muted);
+    }
+
+    .calendar-date {
+      background: var(--input-bg);
+      border-radius: 6px;
+      cursor: pointer;
+      color: white;
+    }
+
+    .calendar-date.today {
+      background: var(--highlight);
+      color: #fff;
+    }
+
+    .appointment-entry {
+      margin-bottom: 0.8rem;
+      border-bottom: 1px solid #334155;
+      padding-bottom: 0.5rem;
+    }
+
+    .appointment-entry:last-child {
+      border-bottom: none;
+    }
+
+    .availability-form label {
+      font-weight: 500;
+    }
+
+    .availability-form input[type="time"] {
+      padding: 0.4rem;
+      background: var(--input-bg);
+      color: white;
+      border: none;
+      border-radius: 4px;
+    }
+
+    .availability-form input[type="checkbox"] {
+      margin-right: 0.4rem;
+    }
+
+    button.save-btn {
+      background: var(--primary);
+      color: white;
+      padding: 0.6rem 1.5rem;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 1rem;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar-toggle {
+        display: block;
+      }
+
+      aside.sidebar {
+        position: fixed;
+        top: 60px;
+        left: 0;
+        transform: translateX(-100%);
+        height: calc(100% - 60px);
+        z-index: 1000;
+      }
+
+      aside.sidebar.show {
+        transform: translateX(0);
+      }
+    }
+  </style>
+</head>
+<body class="dark">
+  <header class="header">
+    <div>
+      <span class="sidebar-toggle" onclick="toggleSidebar()">☰</span>
+      <h1 style="display:inline; margin-left: 1rem;">MedConsult</h1>
+    </div>
+    <div>
+      <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
+      <a href="login.html" class="logout-link" style="color: #f87171; text-decoration: none; margin-left: 1rem;">Logout</a>
+    </div>
+  </header>
+
+  <div class="dashboard-layout">
+    <aside class="sidebar" id="sidebar">
+      <ul>
+        <li><a href="dashboard.html" class="active">Dashboard</a></li>
+        <li><a href="appointments.html">Appointments</a></li>
+        <li><a href="patients.html">Patients</a></li>
+        <li><a href="prescriptions.html">Prescriptions</a></li>
+        <li><a href="settings.html">Settings</a></li>
+        <li><a href="doctor-profile.html">Profile</a></li>
+      </ul>
+    </aside>
+
+    <main class="dashboard-content">
+      <h2>Welcome Back, Doctor</h2>
+
+      <div class="widgets">
+        <div class="widget">Appointments Today <div class="stat-number" id="stat-1">0</div></div>
+        <div class="widget">Patients Visited <div class="stat-number" id="stat-2">0</div></div>
+        <div class="widget">Pending Reviews <div class="stat-number" id="stat-3">0</div></div>
+      </div>
+
+      <div class="progress-section">
+        <h3>Today's Progress</h3>
+        <div class="progress-title">Patients Seen <span style="float:right;">60%</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width: 60%; background: #38bdf8;"></div></div>
+
+        <div class="progress-title">Reports Reviewed <span style="float:right;">30%</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width: 30%; background: #f472b6;"></div></div>
+
+        <div class="progress-title">Prescriptions Given <span style="float:right;">90%</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width: 90%; background: #4ade80;"></div></div>
+      </div>
+
+      <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
+        <div class="appointments-box">
+          <h3>Completed Appointments</h3>
+          <div class="appointment-entry"><strong>Rahul Verma</strong><br /><small>10:00 AM • Diabetes Follow-up</small></div>
+          <div class="appointment-entry"><strong>Priya Sharma</strong><br /><small>11:30 AM • Asthma Checkup</small></div>
+          <div class="appointment-entry"><strong>Karan Patel</strong><br /><small>1:00 PM • Blood Pressure Review</small></div>
+          <a href="#" style="color: var(--primary); display: block; margin-top: 1rem;">View Full History →</a>
+        </div>
+
+        <div class="calendar">
+          <div class="calendar-header">
+            <div>
+              <button onclick="changeMonth(-1)">◀</button>
+              <button onclick="changeMonth(1)">▶</button>
+            </div>
+            <h3 id="monthYear"></h3>
+          </div>
+          <div class="calendar-grid" id="calendarDays"></div>
+        </div>
+      </div>
+
+      <div class="widget" style="margin-top: 2rem;">
+        <h3 style="margin-bottom: 1rem;">Doctor Availability</h3>
+        <form id="availabilityForm" class="availability-form" style="display: flex; flex-direction: column; gap: 1.5rem;">
+          <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
+            <label><input type="checkbox" name="day" value="Mon" /> Monday</label>
+            <label><input type="checkbox" name="day" value="Tue" /> Tuesday</label>
+            <label><input type="checkbox" name="day" value="Wed" /> Wednesday</label>
+            <label><input type="checkbox" name="day" value="Thu" /> Thursday</label>
+            <label><input type="checkbox" name="day" value="Fri" /> Friday</label>
+            <label><input type="checkbox" name="day" value="Sat" /> Saturday</label>
+            <label><input type="checkbox" name="day" value="Sun" /> Sunday</label>
+          </div>
+
+          <div>
+            <label>Morning Slot:</label><br />
+            <input type="time" id="timeMorningStart" value="09:00" /> to
+            <input type="time" id="timeMorningEnd" value="12:00" />
+          </div>
+
+          <div>
+            <label>Evening Slot:</label><br />
+            <input type="time" id="timeEveningStart" value="15:00" /> to
+            <input type="time" id="timeEveningEnd" value="18:00" />
+          </div>
+
+          <button type="button" class="save-btn" onclick="saveAvailability()">💾 Save Availability</button>
+        </form>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    function animateValue(id, start, end, duration) {
+      const range = end - start;
+      const increment = end > start ? 1 : -1;
+      const stepTime = Math.abs(Math.floor(duration / range));
+      const obj = document.getElementById(id);
+      let current = start;
+      const timer = setInterval(() => {
+        current += increment;
+        obj.textContent = current;
+        if (current === end) clearInterval(timer);
+      }, stepTime);
+    }
+
+    animateValue("stat-1", 0, 5, 1000);
+    animateValue("stat-2", 0, 12, 1200);
+    animateValue("stat-3", 0, 3, 800);
+
+    const calendarDays = document.getElementById("calendarDays");
+    const monthYear = document.getElementById("monthYear");
+    let currentDate = new Date();
+
+    function renderCalendar(date) {
+      const year = date.getFullYear();
+      const month = date.getMonth();
+      const today = new Date();
+
+      monthYear.textContent = date.toLocaleString("default", { month: "long", year: "numeric" });
+      calendarDays.innerHTML = "";
+
+      const firstDay = new Date(year, month, 1).getDay();
+      const lastDate = new Date(year, month + 1, 0).getDate();
+
+      const dayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+      dayLabels.forEach(day => {
+        const div = document.createElement("div");
+        div.className = "calendar-day";
+        div.textContent = day;
+        calendarDays.appendChild(div);
+      });
+
+      for (let i = 0; i < firstDay; i++) {
+        calendarDays.appendChild(document.createElement("div"));
+      }
+
+      for (let d = 1; d <= lastDate; d++) {
+        const div = document.createElement("div");
+        div.className = "calendar-date";
+        div.textContent = d;
+
+        if (d === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
+          div.classList.add("today");
+        }
+
+        calendarDays.appendChild(div);
+      }
+    }
+
+    function changeMonth(direction) {
+      currentDate.setMonth(currentDate.getMonth() + direction);
+      renderCalendar(currentDate);
+    }
+
+    renderCalendar(currentDate);
+
+    function saveAvailability() {
+      const days = Array.from(document.querySelectorAll('input[name="day"]:checked')).map(cb => cb.value);
+      const availability = {
+        days: days,
+        morning: {
+          start: document.getElementById('timeMorningStart').value,
+          end: document.getElementById('timeMorningEnd').value
+        },
+        evening: {
+          start: document.getElementById('timeEveningStart').value,
+          end: document.getElementById('timeEveningEnd').value
+        }
+      };
+      localStorage.setItem("doctorAvailability", JSON.stringify(availability));
+      alert("Availability saved!");
+    }
+
+    function toggleSidebar() {
+      document.getElementById("sidebar").classList.toggle("show");
+    }
+
+    function toggleTheme() {
+      const body = document.body;
+      if (body.classList.contains("dark")) {
+        body.classList.remove("dark");
+        body.classList.add("light");
+      } else {
+        body.classList.remove("light");
+        body.classList.add("dark");
+      }
+    }
+  </script>
+</body>
+</html>

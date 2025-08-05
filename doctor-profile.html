@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Doctor Profile - MedConsult</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .profile-card {
+      background: var(--card-bg);
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+      display: flex;
+      gap: 2rem;
+      align-items: center;
+      margin-top: 2rem;
+    }
+
+    .profile-img {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 4px solid var(--primary);
+    }
+
+    .profile-info {
+      flex: 1;
+    }
+
+    .profile-info h2 {
+      margin: 0 0 0.5rem 0;
+    }
+
+    .profile-info p {
+      margin: 0.3rem 0;
+      color: var(--text-muted);
+    }
+
+    .edit-btn {
+      margin-top: 1rem;
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .edit-btn:hover {
+      background: #0078c1;
+    }
+
+    /* Loader Overlay */
+    #loader-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #0f172a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 99999;
+      transition: opacity 0.5s ease;
+    }
+
+    body.light #loader-overlay {
+      background: #f8fafc;
+    }
+
+    .spinner {
+      border: 4px solid #94a3b8;
+      border-top: 4px solid var(--primary);
+      border-radius: 50%;
+      width: 45px;
+      height: 45px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body class="dark">
+  <div id="loader-overlay">
+    <div class="spinner"></div>
+  </div>
+
+  <header class="header">
+    <h1>MedConsult</h1>
+    <a href="login.html" class="logout-link">🔙 Logout</a>
+  </header>
+
+  <div class="dashboard-layout">
+    <aside class="sidebar">
+      <ul>
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="appointments.html">Appointments</a></li>
+        <li><a href="patients.html">Patients</a></li>
+        <li><a href="prescriptions.html">Prescriptions</a></li>
+        <li><a href="settings.html">Settings</a></li>
+        <li><a href="doctor-profile.html" class="active">Profile</a></li>
+      </ul>
+    </aside>
+
+    <main class="dashboard-content">
+      <h2>Doctor Profile</h2>
+      <div class="profile-card">
+        <img src="doctor.png" alt="Doctor Photo" class="profile-img" />
+        <div class="profile-info">
+          <h2>Dr. Nithish Kumar</h2>
+          <p><strong>Specialization:</strong> Cardiology</p>
+          <p><strong>Experience:</strong> 10+ years</p>
+          <p><strong>About:</strong> Passionate doctor committed to patient care and wellness. Experienced in cardiac diagnosis and treatments.</p>
+          <p><strong>Contact:</strong> dr.nithish@medconsult.com | +91 98765 43210</p>
+          <a href="settings.html" class="edit-btn">Edit Profile</a>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Hide loader on page load
+    window.addEventListener("load", function () {
+      const loader = document.getElementById("loader-overlay");
+      loader.style.opacity = 0;
+      setTimeout(() => loader.style.display = "none", 500);
+    });
+  </script>
+  <script src="script.js"></script>
+  <script>
+    fetch(`${API_BASE}/doctor/profile`, {
+  headers: authHeaders()
+})
+.then(res => res.json())
+.then(data => console.log(data))
+.catch(err => console.error("Profile fetch error:", err));
+  </script>
+</body>
+</html>
